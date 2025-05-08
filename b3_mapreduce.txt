@@ -1,0 +1,111 @@
+B3
+
+Title: Map reduce operation with suitable example using MongoDB.
+Problem Statement: Create an orders collection with fields customer id, order date, status,
+price and items, quantity. Execute following queries using MapReduce. Perform map reduce
+operation on orders collection. Perform following queries using map reduce.
+C355211> db.orders.insertMany([
+ {
+ "customer_id": "C1",
+ "order_date": "2024-10-01",
+ "status": "D",
+ "price": 300,
+ "items": [
+ { "item_name": "Laptop", "quantity": 1 },
+ { "item_name": "wire", "quantity": 2 }
+ ]
+ },
+ {
+ "customer_id": "C2",
+ "order_date": "2024-10-02",
+ "status": "P",
+ "price": 150,
+ "items": [
+ { "item_name": "mouse", "quantity": 1 }
+ ]
+ },
+  {
+"customer_id": "C1",
+  "order_date": "2024-10-03",
+  "status": "D",
+  "price": 200,
+  "items": [
+  { "item_name": "mobile", "quantity": 1 }
+  ]
+  },
+  {
+  "customer_id": "C3",
+  "order_date": "2024-10-04",
+  "status": "D",
+ "price": 400,
+  "items": [
+  { "item_name": "headphone", "quantity": 2 }
+  ]
+  },
+  {
+  "customer_id": "C4",
+  "order_date": "2024-10-05",
+  "status": "P",
+  "price": 100,
+  "items": [
+  { "item_name": "screen guard", "quantity": 4 }
+  ]
+  },
+  {
+  "customer_id": "C2",
+  "order_date": "2024-10-06",
+  "status": "D",
+  "price": 250,
+  "items": [
+ { "item_name": "Hard Drive", "quantity": 1 }
+ ]
+ }
+ ]);
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6714fdd37c9c568e63c73bf8'),
+    '1': ObjectId('6714fdd37c9c568e63c73bf9'),
+    '2': ObjectId('6714fdd37c9c568e63c73bfa'),
+    '3': ObjectId('6714fdd37c9c568e63c73bfb'),
+    '4': ObjectId('6714fdd37c9c568e63c73bfc'),
+    '5': ObjectId('6714fdd37c9c568e63c73bfd')
+  }
+}
+
+
+I. Display total price per customer.
+C355211> var mapFunction1 = function() {emit(this.customer_id, this.price);};
+C355211> var reduceFunction1 = function(keyCustomerId, valuesPrices) {return Array.sum(valuesPrices);};
+C355211>  db.orders.mapReduce(mapFunction1,reduceFunction1,{ out: "total_price_per_customer"})
+DeprecationWarning: Collection.mapReduce() is deprecated. Use an aggregation instead.
+See https://docs.mongodb.com/manual/core/map-reduce for details.
+{ result: 'total_price_per_customer', ok: 1 }
+
+
+
+II. Display total price per customer having status= D
+C355211> var mapFunction2 = function() {if (this.status === "D") {emit(this.customer_id, this.price);}};
+
+C355211> var reduceFunction2 = function(keyCustomerId, valuesPrices) {return Array.sum(valuesPrices);};
+
+C355211> db.orders.mapReduce(mapFunction2,reduceFunction2,{ out: "total_price_per_customer_D" } )
+{ result: 'total_price_per_customer_D', ok: 1 }
+
+
+III. Display total price for Status =P
+C355211> var mapFunction3 = function() {if (this.status === "P") {emit(this.status, this.price);}};
+
+C355211> var reduceFunction3 = function(keyStatus, valuesPrices) {return Array.sum(valuesPrices); };
+
+C355211> db.orders.mapReduce(mapFunction3,reduceFunction3,{ out: "total_price_status_P" } )
+{ result: 'total_price_status_P', ok: 1 }
+
+
+IV. Finding count of all keys in orders collection
+C355211> var mapFunction4 = function() {for (var k in this) {emit(k, { count: 1 });}};
+
+C355211> var reduceFunction4 = function(keys, cnt) {var total = 0;for (var i = 0; i < cnt.length; i++) {total += cnt[i].count;}return { count: total };};
+
+C3552911>  db.orders.mapReduce(mapFunction4,reduceFunction4,{ out: "Result4" });
+{ result: 'Result4', ok: 1 }

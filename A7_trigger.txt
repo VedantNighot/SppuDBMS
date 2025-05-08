@@ -1,0 +1,145 @@
+1. Trigger to Track Updates and Deletes
+
+
+CREATE TABLE Library_Audit (
+    B_id INT,
+    Title VARCHAR(100),
+    Edition VARCHAR(50),
+    no_of_copies INT,
+    date_of_mod DATE,
+    type_of_operation VARCHAR(20),
+    user_who_performed VARCHAR(50)
+);
+
+
+CREATE OR REPLACE TRIGGER trg_library_audit
+AFTER UPDATE OR DELETE ON Library
+FOR EACH ROW
+BEGIN
+    IF UPDATING THEN
+        INSERT INTO Library_Audit (
+            B_id, Title, Edition, no_of_copies, date_of_mod, type_of_operation, user_who_performed
+        )
+        VALUES (
+            :OLD.B_id, :OLD.Title, :OLD.Edition, :OLD.no_of_copies, SYSDATE, 'UPDATE', USER
+        );
+    ELSIF DELETING THEN
+        INSERT INTO Library_Audit (
+            B_id, Title, Edition, no_of_copies, date_of_mod, type_of_operation, user_who_performed
+        )
+        VALUES (
+            :OLD.B_id, :OLD.Title, :OLD.Edition, :OLD.no_of_copies, SYSDATE, 'DELETE', USER
+        );
+    END IF;
+END;
+/
+
+
+
+2. Trigger to Check Book Availability Before Issuing
+
+
+
+CREATE OR REPLACE TRIGGER trg_check_availability
+BEFORE INSERT ON Transaction
+FOR EACH ROW
+DECLARE
+    v_available_copies INT;
+BEGIN
+    -- Check the number of available copies
+    SELECT no_of_copies INTO v_available_copies
+    FROM Library
+    WHERE B_id = :NEW.Book_id;
+    
+    -- Check if the requested copies exceed available copies
+    IF :NEW.no_of_copies_issued_returned > v_available_copies THEN
+        :NEW.no_of_copies_issued_returned := v_available_copies;
+        DBMS_OUTPUT.PUT_LINE('Requested copies exceed available copies. Issuing only ' || v_available_copies || ' copies.');
+    END IF;
+END;
+/
+
+
+3. Trigger to Update the Number of Copies After Issuing or Returning
+
+
+CREATE OR REPLACE TRIGGER trg_update_copies
+AFTER INSERT ON Transaction
+FOR EACH ROW
+BEGIN
+    IF :NEW.issue_or_return = 'issue' THEN
+        UPDATE Library
+        SET no_of_copies = no_of_copies - :NEW.no_of_copies_issued_returned
+        WHERE B_id = :NEW.Book_id;
+    ELSIF :NEW.issue_or_return = 'return' THEN
+        UPDATE Library
+        SET no_of_copies = no_of_copies + :NEW.no_of_copies_issued_returned
+        WHERE B_id = :NEW.Book_id;
+    END IF;
+END;
+/
+
+
+--------------------------------------------------------------------------------------------
+Output:    
+
+1)
+-- Initial Library Table Data
+INSERT INTO Library (B_id, Title, Edition, no_of_copies) VALUES (1, 'Book A', '1st', 10);
+INSERT INTO Library (B_id, Title, Edition, no_of_copies) VALUES (2, 'Book B', '2nd', 5);
+INSERT INTO Library (B_id, Title, Edition, no_of_copies) VALUES (3, 'Book C', '3rd', 8);
+INSERT INTO Library (B_id, Title, Edition, no_of_copies) VALUES (4, 'Book D', '4th', 2);
+INSERT INTO Library (B_id, Title, Edition, no_of_copies) VALUES (5, 'Book E', '5th', 15);
+
+
+-- Initial Transaction Table Data
+INSERT INTO Transaction (Transaction_id, Book_id, Sid, issue_or_return, no_of_copies_issued_returned, issue_date_or_return_date) VALUES (1, 1, 'S1', 'issue', 3, SYSDATE);
+INSERT INTO Transaction (Transaction_id, Book_id, Sid, issue_or_return, no_of_copies_issued_returned, issue_date_or_return_date) VALUES (2, 2, 'S2', 'issue', 6, SYSDATE);
+INSERT INTO Transaction (Transaction_id, Book_id, Sid, issue_or_return, no_of_copies_issued_returned, issue_date_or_return_date) VALUES (3, 3, 'S3', 'return', 5, SYSDATE);
+
+
+-- Simulate an update on the Library table
+UPDATE Library SET no_of_copies = 7 WHERE B_id = 1;
+
+-- Simulate a delete on the Library table
+DELETE FROM Library WHERE B_id = 4;
+
+-- Check Library_Audit Table
+SELECT * FROM Library_Audit;
+
+B_id | Title  | Edition | no_of_copies | date_of_mod | type_of_operation | user_who_performed
+-----|--------|---------|--------------|-------------|--------------------|-------------------
+1    | Book A | 1st     | 10           | <date>      | UPDATE             | <username>
+4    | Book D | 4th     | 2            | <date>      | DELETE             | <username>
+
+
+2)
+
+-- Issue a book where requested copies exceed available copies
+INSERT INTO Transaction (Transaction_id, Book_id, Sid, issue_or_return, no_of_copies_issued_returned, issue_date_or_return_date) VALUES (4, 5, 'S4', 'issue', 20, SYSDATE);
+
+Requested copies exceed available copies. Issuing only 15 copies.
+
+SELECT * FROM Library;
+
+B_id | Title  | Edition | no_of_copies
+-----|--------|---------|--------------
+1    | Book A | 1st     | 7
+2    | Book B | 2nd     | 5
+3    | Book C | 3rd     | 13
+5    | Book E | 5th     | 0
+
+3)
+
+-- Issue and Return Transactions
+INSERT INTO Transaction (Transaction_id, Book_id, Sid, issue_or_return, no_of_copies_issued_returned, issue_date_or_return_date) VALUES (5, 1, 'S5', 'return', 2, SYSDATE);
+
+SELECT * FROM Library;
+
+
+B_id | Title  | Edition | no_of_copies
+-----|--------|---------|--------------
+1    | Book A | 1st     | 9
+2    | Book B | 2nd     | 5
+3    | Book C | 3rd     | 13
+5    | Book E | 5th     | 0

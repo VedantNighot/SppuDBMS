@@ -1,0 +1,417 @@
+test> use C35521db
+switched to db C35521db
+C35529db> db.or.insert({Order_id : 1,Cust_id : "A1",Cust_name : "Rohan",Phone_no :[9890151243,8806048721],Email_id : "Ro
+han@gmail.com",Item_name : "Laptop",DtOfOrder : ISODate("2017-06-12T00:00:00Z"),Qty : 2,Amt : 90000,Status : "D"}){
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('6714e30f0d81c1b033c73bf8') }
+}
+C35521db> db.or.insertOne({Order_id : 1,Cust_id : "A1",Cust_name : "Rohan",Phone_no :[9890151243,8806048721],Email_id : "Rohan@gmail.com",Item_name : "Laptop",DtOfOrder : ISODate("2017-06-12T00:00:00Z"),Qty : 2,Amt : 90000,Status : "D"})
+{
+  acknowledged: true,
+  insertedId: ObjectId('6714e3230d81c1b033c73bf9')
+}
+C35521db> db.or.insert({Order_id : 2,Cust_id : "B1",Cust_name : "raj",Phone_no :[9860151243,8806048723],Item_name : "Wa
+tch",DtOfOrder : ISODate("2024-06-12T00:00:00Z"),Qty : 3,Amt : 15000,Status : "P"})
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('6714f57c0d81c1b033c73bfa') }
+}C35529db> db.or.insert({Order_id : 3,Cust_id : "C1",Cust_name : "Nina",Phone_no :[9960151243,8706048723],Item_name : "
+Mobile",DtOfOrder : ISODate("2017-02-12T00:00:00Z"),Qty : 2,Amt : 30000,Status : "P"})
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('6714f5af0d81c1b033c73bfb') }
+}
+}
+C35529db> db.or.insert({Order_id : 4,Cust_id: "B1",Cust_name : "Sneha",Phone_no :[860151243,8806048723],Item_name : "T-shirt",DtOfOrder : ISODate("2017-08-22T00:00:00Z"),Qty : 6,Amt : 12000,Status : "D"})
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('6714f5fb0d81c1b033c73bfc') }
+}C35529db> db.or.insert({Order_id : 5,Cust_id : "C1",Cust_name : "Pritam",Phone_no :[9960151243,8706048723],Item_name : "Jio Router",DtOfOrder : ISODate("2017-02-12T00:00:00Z"),Qty: 3,Amt : 6000,Status : "P"})
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('6714f6470d81c1b033c73bfd') }
+}
+
+
+i. Create a simple index on cust_id and also create a simple index on Item_name. Try to
+make a duplicate entry
+C35521db> db.or.createIndex({Cust_id:1})
+Cust_id_1
+C35521db> db.or.createIndex({Item_name:1})
+Item_name_1
+C35521db> db.or.getIndexes()
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { Cust_id: 1 }, name: 'Cust_id_1' },
+  { v: 2, key: { Item_name: 1 }, name: 'Item_name_1' }
+]
+
+ii. Create unique index on the order_id key and try to make duplicate entry
+C35521db> db.or.createIndex({Order_id:1}, {unique:true})
+MongoServerError[DuplicateKey]: Index build failed: 547fca31-b1c5-4b98-b687-2814bbc2637d: Collection C35529db.or ( 60eca6bf-7a6f-4256-9529-2c5d4ab07aeb ) :: caused by :: E11000 duplicate key error collection: C35521db.or index: Order_id_1 dup key: { Order_id: 1 }
+
+
+iii. Create a multikey index on phone_no and find the customers with 2 phone nos. 
+C35521db> db.or.createIndex({Phone_no:1})
+Phone_no_1
+C35521db> db.or.find({Phone_no:{$size:2}}).pretty()
+[
+  {
+    _id: ObjectId('6714e30f0d81c1b033c73bf8'),
+    Order_id: 1,
+    Cust_id: 'A1',
+    Cust_name: 'Rohan',
+    Phone_no: [ 9890151243, 8806048721 ],
+    Email_id: 'Rohan@gmail.com',
+    Item_name: 'Laptop',
+    DtOfOrder: ISODate('2017-06-12T00:00:00.000Z'),
+    Qty: 2,
+    Amt: 90000,
+    Status: 'D'
+  },
+  {
+    _id: ObjectId('6714e3230d81c1b033c73bf9'),
+    Order_id: 1,
+    Cust_id: 'A1',
+    Cust_name: 'raj',
+    Phone_no: [ 9890151243, 8806048721 ],
+    Email_id: 'Rohan@gmail.com',
+    Item_name: 'Laptop',
+    DtOfOrder: ISODate('2017-06-12T00:00:00.000Z'),
+    Qty: 2,
+    Amt: 90000,
+    Status: 'D'
+  },
+  {
+    _id: ObjectId('6714f57c0d81c1b033c73bfa'),
+    Order_id: 2,
+    Cust_id: 'B1',
+    Cust_name: 'Ishita',
+    Phone_no: [ 9860151243, 8806048723 ],
+    Item_name: 'Watch',
+    DtOfOrder: ISODate('2024-06-12T00:00:00.000Z'),
+    Qty: 3,
+    Amt: 15000,
+    Status: 'P'
+  },
+  {
+    _id: ObjectId('6714f5af0d81c1b033c73bfb'),
+    Order_id: 3,
+    Cust_id: 'C1',
+    Cust_name: 'Nina',
+    Phone_no: [ 9960151243, 8706048723 ],
+    Item_name: 'Mobile',
+    DtOfOrder: ISODate('2017-02-12T00:00:00.000Z'),
+    Qty: 2,
+    Amt: 30000,
+    Status: 'P'
+  },
+  {
+    _id: ObjectId('6714f5fb0d81c1b033c73bfc'),
+    Order_id: 4,
+    Cust_id: 'B1',
+    Cust_name: 'Sneha',
+    Phone_no: [ 860151243, 8806048723 ],
+    Item_name: 'T-shirt',
+    DtOfOrder: ISODate('2017-08-22T00:00:00.000Z'),
+    Qty: 6,
+    Amt: 12000,
+    Status: 'D'
+  },
+  {
+    _id: ObjectId('6714f6470d81c1b033c73bfd'),
+    Order_id: 5,
+    Cust_id: 'C1',
+    Cust_name: 'Pritam',
+    Phone_no: [ 9960151243, 8706048723 ],
+    Item_name: 'Jio Router',
+    DtOfOrder: ISODate('2017-02-12T00:00:00.000Z'),
+    Qty: 3,
+    Amt: 6000,
+    Status: 'P'
+  }
+]
+
+iv. Create a sparse index on email_id key and show the effects with and without indexing.
+(Hint:use find() before and after aplying index. Also use .explain())
+C35521db> db.or.find({Email_id:"Rohan@gmail.com"}).explain()
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'C35521db.or',
+    parsedQuery: { Email_id: { '$eq': 'Rohan@gmail.com' } },
+    indexFilterSet: false,
+    queryHash: 'DB161C22',
+    planCacheKey: '8119F420',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'FETCH',
+      inputStage: {
+        stage: 'IXSCAN',
+        keyPattern: { Email_id: 1 },
+        indexName: 'Email_id_1',
+        isMultiKey: false,
+        multiKeyPaths: { Email_id: [] },
+        isUnique: false,
+        isSparse: true,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { Email_id: [ '["Rohan@gmail.com", "Rohan@gmail.com"]' ] }
+      }
+    },
+    rejectedPlans: []
+  },
+  command: {
+    find: 'or',
+    filter: { Email_id: 'Rohan@gmail.com' },
+    '$db': 'C35521db'
+  },
+  serverInfo: {
+    host: 'LAPTOP-S6301KR5',
+    port: 27017,
+    version: '8.0.0',
+    gitVersion: 'd7cd03b239ac39a3c7d63f7145e91aca36f93db6'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+C35521db> db.or.createIndex({Email_id:1},{sparse:true})
+Email_id_1
+C35529db> db.or.find({Email_id:"Rohan.com"}).explain()
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'C35521db.or',
+    parsedQuery: { Email_id: { '$eq': 'Rohan.com' } },
+    indexFilterSet: false,
+    queryHash: 'DB161C22',
+    planCacheKey: '8119F420',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'FETCH',
+      inputStage: {
+        stage: 'IXSCAN',
+        keyPattern: { Email_id: 1 },
+        indexName: 'Email_id_1',
+        isMultiKey: false,
+        multiKeyPaths: { Email_id: [] },
+        isUnique: false,
+        isSparse: true,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { Email_id: [ '["Rohan.com", "Rohan.com"]' ] }
+      }
+    },
+    rejectedPlans: []
+  },
+  command: { find: 'or', filter: { Email_id: 'Rohan.com' }, '$db': 'C35529db' },
+  serverInfo: {
+    host: 'LAPTOP-S6301KR5',
+    port: 27017,
+    version: '8.0.0',
+    gitVersion: 'd7cd03b239ac39a3c7d63f7145e91aca36f93db6'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+
+
+v. Display all indexes created on order collection and Also show the size of indexes. 
+C35521db> db.or.getIndexes()
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { Cust_id: 1 }, name: 'Cust_id_1' },
+  { v: 2, key: { Item_name: 1 }, name: 'Item_name_1' },
+  { v: 2, key: { Phone_no: 1 }, name: 'Phone_no_1' },
+  { v: 2, key: { Email_id: 1 }, name: 'Email_id_1', sparse: true }
+]
+C35521db> db.or.totalIndexSize()
+118784
+
+
+vi. Delete all indexes. 
+C35521db> db.or.dropIndexes()
+{
+  nIndexesWas: 5,
+  msg: 'non-_id indexes dropped for collection',
+  ok: 1
+}
+
+
+vii.
+A) Find Total no of orders received so far 
+C35521db> db.or.find({Status:'D'}).count()
+3
+
+B) how many orders are pending. 
+C35521db> db .orders.find({Status:'P'}).count()
+1
+
+
+
+viii. Display all customer names of orders collection with no repetition 
+C35521db> db.or.distinct("Cust_name") [ "Rohan", "Sneha", "Pritam" ]
+
+
+ix.
+A)Find Total no of orders received so far
+C35521db> db.or.find({Status:'D'}).count()
+3
+
+B)how many orders are pending
+C35521db> db.or.find({Status:'P'}).count()
+3
+
+
+x. Show results and details of sorting documents based on amount
+C35521db> db.or.find().sort({Amt:1}).pretty()
+[
+  {
+    _id: ObjectId('6714f6470d81c1b033c73bfd'),
+    Order_id: 5,
+    Cust_id: 'C1',
+    Cust_name: 'Pritam',
+    Phone_no: [ 9960151243, 8706048723 ],
+    Item_name: 'Jio Router',
+    DtOfOrder: ISODate('2017-02-12T00:00:00.000Z'),
+    Qty: 3,
+    Amt: 6000,
+    Status: 'P'
+  },
+  {
+    _id: ObjectId('6714f5fb0d81c1b033c73bfc'),
+    Order_id: 4,
+    Cust_id: 'B1',
+    Cust_name: 'Sneha',
+    Phone_no: [ 860151243, 8806048723 ],
+    Item_name: 'T-shirt',
+    DtOfOrder: ISODate('2017-08-22T00:00:00.000Z'),
+    Qty: 6,
+    Amt: 12000,
+    Status: 'D'
+  },
+  {
+    _id: ObjectId('6714f57c0d81c1b033c73bfa'),
+    Order_id: 2,
+    Cust_id: 'B1',
+    Cust_name: 'Ishita',
+    Phone_no: [ 9860151243, 8806048723 ],
+    Item_name: 'Watch',
+    DtOfOrder: ISODate('2024-06-12T00:00:00.000Z'),
+    Qty: 3,
+    Amt: 15000,
+    Status: 'P'
+  },
+  {
+    _id: ObjectId('6714f5af0d81c1b033c73bfb'),
+    Order_id: 3,
+    Cust_id: 'C1',
+    Cust_name: 'Nina',
+    Phone_no: [ 9960151243, 8706048723 ],
+    Item_name: 'Mobile',
+    DtOfOrder: ISODate('2017-02-12T00:00:00.000Z'),
+    Qty: 2,
+    Amt: 30000,
+    Status: 'P'
+  },
+  {
+    _id: ObjectId('6714e30f0d81c1b033c73bf8'),
+    Order_id: 1,
+    Cust_id: 'A1',
+    Cust_name: 'Rohan',
+    Phone_no: [ 9890151243, 8806048721 ],
+    Email_id: 'Rohan@gmail.com',
+    Item_name: 'Laptop',
+    DtOfOrder: ISODate('2017-06-12T00:00:00.000Z'),
+    Qty: 2,
+    Amt: 90000,
+    Status: 'D'
+  },
+  {
+    _id: ObjectId('6714e3230d81c1b033c73bf9'),
+    Order_id: 1,
+    Cust_id: 'A1',
+    Cust_name: 'raj',
+    Phone_no: [ 9890151243, 8806048721 ],
+    Email_id: 'Rohan@gmail.com',
+    Item_name: 'Laptop',
+    DtOfOrder: ISODate('2017-06-12T00:00:00.000Z'),
+    Qty: 2,
+    Amt: 90000,
+    Status: 'D'
+  }
+]
+
+
+
+xi. Show how many orders are placed by each customer.
+C35521db> db.or.aggregate({$group:{_id:"$Cust_name",cnt_of_order:{$sum:1}}})
+[
+  { _id: 'Ishita', cnt_of_order: 1 },
+  { _id: 'Rohan', cnt_of_order: 2 },
+  { _id: 'Sneha', cnt_of_order: 1 },
+  { _id: 'Pritam', cnt_of_order: 1 },
+  { _id: 'Nina', cnt_of_order: 1 }
+]
+
+xii. Display all customer ids and their total pending order amount in descending order.
+C35521db>  db.or.aggregate({$match:{Status:'P'}}, {$group:{_id:"$Cust_id", pend_amt:
+... {$sum:"$Amt"}}},{$sort:{pend_amt:-1}})
+[ { _id: 'C1', pend_amt: 36000 }, { _id: 'B1', pend_amt: 15000 } ]
+
+
+
+xiii. Display all customer ids in ascending order with total order amount which have been is
+delivered. db.or.aggregate({$match:{Status:'D'}},{$group:{_id:"$Cust_id",tot_amt:{$sum:
+"$Amt"}}},{$sort:{_id:1}})
+
+
+xiv. Show top three Selling Items from orders collection.
+db.or.aggregate({$group:{_id:"$Item_name",totqty:{$sum:"$Qty"}}}, {$sort: {totqty:-
+1}},{$limit:3})
+
+
+xv. Find the date on which maximum orders are received.
+db.or.aggregate({$group:{_id:"$DtOfOrder",cnt_of_order:{$sum:1}}},{$sort: {cnt_of_order:-
+1}},{$limit:1})
+{ "_id" : ISODate("2017-02-12T00:00:00Z"), "cnt_of_order" : 3 }
+
+
+xvi. Find which customer has placed maximum orders.
+db.or.aggregate({$group:{_id:"$Cust_name",cnt_orderid:{$sum:1}}},{$sort: {cnt_orderid:-
+1}},{$limit:1})
+{ "_id" : "Sam", "cnt_orderid" : 2 }

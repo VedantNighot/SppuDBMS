@@ -1,0 +1,185 @@
+CREATE TABLE Patient (
+    pat_id VARCHAR(5) PRIMARY KEY,
+    pat_name VARCHAR(50),
+    date_adm DATE,
+    age INT,
+    city VARCHAR(50),
+    email VARCHAR(100)
+);
+
+CREATE TABLE Doctor (
+    doc_id VARCHAR(5) PRIMARY KEY,
+    doc_name VARCHAR(50),
+    qualification VARCHAR(50),
+    exp INT,
+    dept VARCHAR(50),
+    city VARCHAR(50),
+    salary DECIMAL(10, 2)
+);
+
+CREATE TABLE Treats (
+    doc_id VARCHAR(5),
+    pat_id VARCHAR(5),
+    disease VARCHAR(50),
+    fees DECIMAL(10, 2),
+    FOREIGN KEY (doc_id) REFERENCES Doctor(doc_id) ON DELETE CASCADE,
+    FOREIGN KEY (pat_id) REFERENCES Patient(pat_id) ON DELETE SET NULL
+);
+
+-- Insert data for Patient
+INSERT INTO Patient (pat_id, pat_name, date_adm, age, city, email) VALUES
+('P1', 'Raj', '2024-02-22', 24, 'Pune', 'bot1@mail.com'),
+('P2', 'Ram', '2024-03-22', 24, 'Pune', 'bot2@mail.com'),
+('P3', 'Hemant', '2024-04-22', 24, 'Pune', 'bot3@mail.com'),
+('P4', 'Phill', '2024-05-22', 24, 'Pune', 'bot4@mail.com'),
+('P5', 'Rushi', '2024-06-22', 24, 'Pune', 'bot5@mail.com');
+
+-- Insert data for Doctor
+INSERT INTO Doctor (doc_id, doc_name, qualification, exp, dept, city, salary) VALUES
+('D1', 'Sujit', 'Mbbs', 3, 'Ortho', 'Pune', 9234849),
+('D2', 'Sam', 'Md', 4, 'Physician', 'Pune', 2349334),
+('D3', 'Doc1', 'Md', 5, 'Cardio', 'Pune', 239334),
+('D4', 'Doc2', 'Md', 6, 'Neuro', 'Pune', 2349334),
+('D5', 'Doc3', 'Md', 7, 'Physician', 'Pune', 2439334);
+
+-- Insert data for Treats
+INSERT INTO Treats (doc_id, pat_id, disease, fees) VALUES
+('D1', 'P5', 'Cancer', 890234),
+('D2', 'P4', 'Heart attack', 890234),
+('D3', 'P3', 'Fever', 890234),
+('D4', 'P2', 'Flu', 890234),
+('D5', 'P1', 'Cancer', 890234);
+
+
+!)
+SELECT pat_name 
+FROM Patient 
+WHERE age BETWEEN 18 AND 50;
+
+2)
+SELECT doc_name 
+FROM Doctor 
+WHERE qualification = 'Md';
+
+3)
+SELECT doc_name 
+FROM Doctor 
+WHERE exp > 20;
+
+4)
+SELECT pat_name 
+FROM Patient p 
+JOIN Treats t ON p.pat_id = t.pat_id 
+WHERE t.disease = 'Cancer';
+
+5)
+SELECT p.pat_name, d.doc_name 
+FROM Patient p 
+JOIN Treats t ON p.pat_id = t.pat_id 
+JOIN Doctor d ON t.doc_id = d.doc_id 
+WHERE t.disease = 'Cancer';
+
+6)
+SELECT pat_name 
+FROM Patient 
+WHERE pat_name LIKE 'A___A';
+
+7)
+DELETE FROM Patient 
+WHERE pat_id = 'P10';
+
+8)
+DELETE FROM Doctor 
+WHERE doc_name = 'Suhas';
+
+9)
+UPDATE Doctor 
+SET qualification = 'Md' 
+WHERE doc_name = 'Shubham' AND qualification = 'Mbbs';
+
+11)
+UPDATE Doctor 
+SET salary = salary * CASE 
+    WHEN dept = 'Dentist' THEN 1.05 
+    WHEN dept = 'Cardio' THEN 1.10 
+END 
+WHERE dept IN ('Dentist', 'Cardio');
+
+12)
+SELECT dept, SUM(salary) AS total_salary 
+FROM Doctor 
+GROUP BY dept;
+
+13)
+SELECT dept 
+FROM Doctor 
+GROUP BY dept 
+ORDER BY AVG(salary) DESC 
+LIMIT 1;
+
+14)
+SELECT AVG(salary) AS avg_salary 
+FROM Doctor 
+WHERE dept = 'Dentist';
+
+15)
+SELECT dept 
+FROM Doctor 
+GROUP BY dept 
+HAVING AVG(salary) > 50000;
+
+16)
+SELECT COUNT(*) AS num_doctors 
+FROM Doctor;
+
+17)
+SELECT COUNT(DISTINCT doc_id) AS num_doctors 
+FROM Treats;
+
+18)
+SELECT DISTINCT city 
+FROM Doctor 
+UNION 
+SELECT DISTINCT city 
+FROM Patient;
+
+19)
+SELECT city 
+FROM Doctor 
+INTERSECT 
+SELECT city 
+FROM Patient;
+ 
+20)
+SELECT d.doc_name, p.pat_name, d.city 
+FROM Doctor d 
+JOIN Patient p ON d.city = p.city;
+
+21)
+
+SELECT doc_name AS name 
+FROM Doctor 
+UNION 
+SELECT pat_name AS name 
+FROM Patient;
+
+SELECT doc_name AS name 
+FROM Doctor 
+UNION ALL 
+SELECT pat_name AS name 
+FROM Patient;
+
+
+22)
+SELECT SUM(fees) AS total_money_collected 
+FROM Treats;
+
+23)
+SELECT dept, AVG(salary) AS avg_salary 
+FROM Doctor 
+GROUP BY dept;
+
+24)
+SELECT pat_name 
+FROM Patient 
+WHERE email IS NULL OR email = '';

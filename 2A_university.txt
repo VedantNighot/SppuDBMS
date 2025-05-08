@@ -1,0 +1,194 @@
+1.Add the primary key in department table
+
+ALTER TABLE department ADD COLUMN budget DECIMAL(15, 2);
+mysql> ALTER TABLE department ADD COLUMN budget DECIMAL(15, 2);
+Query OK, 0 rows affected (0.04 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> select * from department;
++---------+------------+---------------+--------+
+| dept_no | dept_name  | building_name | budget |
++---------+------------+---------------+--------+
+| D1      | Computer   | B1            |   NULL |
+| D2      | IT         | B2            |   NULL |
+| D3      | ENTC       | B3            |   NULL |
+| D4      | Mechanical | B4            |   NULL |
+| D5      | Phd        | B5            |   NULL |
++---------+------------+---------------+--------+
+
+2.Add the foreign key in instructor table.
+
+CREATE UNIQUE INDEX idx_mob_no ON instructor(mob_no);
+mysql> CREATE UNIQUE INDEX idx_mob_no ON instructor(mob_no);
+Query OK, 0 rows affected (0.07 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+mysql> select* from instructor;
++--------+----------------+---------+------------+------------+
+| ins_id | ins_name       | dept_no | salary     | mob_no     |
++--------+----------------+---------+------------+------------+
+| I1     | Sujit Avchar   | D1      | 7316478.00 | 9023143121 |
+| I2     | Rushikesh More | D2      | 7000000.00 | 9111110918 |
+| I3     | Mr Robot       | D3      |    7345.00 | 9056143121 |
+| I4     | Bot Siri       | D4      |    7318.00 | 9023134121 |
+| I5     | Sam            | D5      |   73168.00 | 9023134521 |
++--------+----------------+---------+------------+------------+
+
+3.Modify the table department by adding a column budget.
+
+CREATE VIEW instructor_view AS
+SELECT ins_id, ins_name, dept_no, mob_no
+FROM instructor;
+
+mysql> CREATE VIEW instructor_view AS
+    -> SELECT ins_id, ins_name, dept_no, mob_no
+    -> FROM instructor;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select* from instructor_view;
++--------+----------------+---------+------------+
+| ins_id | ins_name       | dept_no | mob_no     |
++--------+----------------+---------+------------+
+| I1     | Sujit Avchar   | D1      | 9023143121 |
+| I2     | Rushikesh More | D2      | 9111110918 |
+| I3     | Mr Robot       | D3      | 9056143121 |
+| I4     | Bot Siri       | D4      | 9023134121 |
+| I5     | Sam            | D5      | 9023134521 |
++--------+----------------+---------+------------+
+
+4.Create unique index on mobile number of instructor table.
+
+mysql> INSERT INTO instructor_view (ins_id, ins_name, dept_no, mob_no)
+    -> VALUES ('I6', 'John Doe', 'D2', '9000000000');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> select * from instructor_view;
++--------+----------------+---------+------------+
+| ins_id | ins_name       | dept_no | mob_no     |
++--------+----------------+---------+------------+
+| I1     | Sujit Avchar   | D1      | 9023143121 |
+| I2     | Rushikesh More | D2      | 9111110918 |
+| I3     | Mr Robot       | D3      | 9056143121 |
+| I4     | Bot Siri       | D4      | 9023134121 |
+| I5     | Sam            | D5      | 9023134521 |
+| I6     | John Doe       | D2      | 9000000000 |
++--------+----------------+---------+------------+
+6 rows in set (0.00 sec)
+
+5.Create a view of instructor relation except the salary field.
+
+mysql> UPDATE instructor_view
+    -> SET dept_no = 'D3'
+    -> WHERE ins_id = 'I6';
+Query OK, 1 row affected (0.03 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from instructor_view;
++--------+----------------+---------+------------+
+| ins_id | ins_name       | dept_no | mob_no     |
++--------+----------------+---------+------------+
+| I1     | Sujit Avchar   | D1      | 9023143121 |
+| I2     | Rushikesh More | D2      | 9111110918 |
+| I3     | Mr Robot       | D3      | 9056143121 |
+| I4     | Bot Siri       | D4      | 9023134121 |
+| I5     | Sam            | D5      | 9023134521 |
+| I6     | John Doe       | D3      | 9000000000 |
++--------+----------------+---------+------------+
+
+6.Insert record into instructor table using newly created viewname.
+
+mysql> DELETE FROM instructor_view
+    -> WHERE ins_id = 'I6';
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from instructor_view;
++--------+----------------+---------+------------+
+| ins_id | ins_name       | dept_no | mob_no     |
++--------+----------------+---------+------------+
+| I1     | Sujit Avchar   | D1      | 9023143121 |
+| I2     | Rushikesh More | D2      | 9111110918 |
+| I3     | Mr Robot       | D3      | 9056143121 |
+| I4     | Bot Siri       | D4      | 9023134121 |
+| I5     | Sam            | D5      | 9023134521 |
++--------+----------------+---------+------------+
+
+7.Update the department number of particular instructor using update view
+
+mysql> DROP VIEW instructor_view;
+Query OK, 0 rows affected (0.02 sec)
+
+8.Delete record of particular instructor from instructor table using newly created viewname.
+
+mysql> ALTER TABLE department DROP COLUMN budget;
+Query OK, 0 rows affected (0.04 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> select *from department;
++---------+------------+---------------+
+| dept_no | dept_name  | building_name |
++---------+------------+---------------+
+| D1      | Computer   | B1            |
+| D2      | IT         | B2            |
+| D3      | ENTC       | B3            |
+| D4      | Mechanical | B4            |
+| D5      | Phd        | B5            |
++---------+------------+---------------+
+5 rows in set (0.00 sec)
+
+9.Delete the last view.
+
+mysql> DROP INDEX idx_mob_no ON instructor;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+10.Remove the Budget from department table.
+
+mysql> RENAME TABLE course TO university_courses;
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> select *from instructor;
++--------+----------------+---------+------------+------------+
+| ins_id | ins_name       | dept_no | salary     | mob_no     |
++--------+----------------+---------+------------+------------+
+| I1     | Sujit Avchar   | D1      | 7316478.00 | 9023143121 |
+| I2     | Rushikesh More | D2      | 7000000.00 | 9111110918 |
+| I3     | Mr Robot       | D3      |    7345.00 | 9056143121 |
+| I4     | Bot Siri       | D4      |    7318.00 | 9023134121 |
+| I5     | Sam            | D5      |   73168.00 | 9023134521 |
++--------+----------------+---------+------------+------------+
+5 rows in set (0.00 sec)
+
+11.Increase the size of the title field of course relation.
+
+mysql> select* from university_courses;
++-----------+-------------------+---------+---------+
+| course_id | title             | dept_no | credits |
++-----------+-------------------+---------+---------+
+|       101 | Data Structures   | D1      |       4 |
+|       102 | Networks          | D2      |       3 |
+|       103 | Digital Systems   | D3      |       3 |
+|       104 | Thermodynamics    | D4      |       4 |
+|       105 | Quantum Mechanics | D5      |       5 |
++-----------+-------------------+---------+---------+
+5 rows in set (0.00 sec)
+
+12.Create a view by showing a instructor name and title of course they teaches.
+
+mysql> CREATE VIEW instructor_course_view AS
+    -> SELECT i.ins_name, c.title
+    -> FROM instructor i
+    -> JOIN teaches t ON i.ins_id = t.teacher_id
+    -> JOIN university_courses c ON t.course_id = c.course_id;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select *from  instructor_course_view;
++----------------+-------------------+
+| ins_name       | title             |
++----------------+-------------------+
+| Sujit Avchar   | Data Structures   |
+| Rushikesh More | Networks          |
+| Mr Robot       | Digital Systems   |
+| Bot Siri       | Thermodynamics    |
+| Sam            | Quantum Mechanics |
++----------------+-------------------+
+
+

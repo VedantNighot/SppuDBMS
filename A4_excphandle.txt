@@ -1,0 +1,72 @@
+CREATE DATABASE library_db;
+USE library_db;
+
+
+
+-- Create a table for borrowers
+CREATE TABLE borrower_t21 (
+    roll_no INT,
+    name VARCHAR(20),
+    date_of_i DATE,
+    name_of_book VARCHAR(20),
+    status VARCHAR(10)
+);
+
+-- Create a table for fines
+CREATE TABLE fine_t21 (
+    roll_no INT,
+    date_of_r DATE,
+    amt INT
+);
+
+
+
+-- Inserting records into the borrower table
+INSERT INTO borrower_t21 VALUES (52, 'aniket', TO_DATE('2019-06-12', 'YYYY-MM-DD'), 'atomic habits', 'i');
+INSERT INTO borrower_t21 VALUES (53, 'samarth', TO_DATE('2011-06-15', 'YYYY-MM-DD'), 'time', 'r');
+INSERT INTO borrower_t21 VALUES (41, 'Dinesh', TO_DATE('2012-07-25', 'YYYY-MM-DD'), 'Alchemist', 'i');
+INSERT INTO borrower_t21 VALUES (40, 'Sneha', TO_DATE('2017-04-20', 'YYYY-MM-DD'), 'Nutrition', 'r');
+INSERT INTO borrower_t21 VALUES (53, 'sujit', TO_DATE('2015-05-22', 'YYYY-MM-DD'), 'Brida', 'i');
+
+-- Query to display all records in borrower_t21
+SELECT * FROM borrower_t21;
+
+DECLARE
+    roll INT := &roll_number;        -- Declare a variable to store the roll number
+    b_name VARCHAR(20) := '&bookname'; -- Declare a variable to store the book name
+    mdays INT := 0;                  -- Declare a variable to store the number of days the book is overdue
+    ndays DATE;                      -- Variable to store the issue date of the book
+    fine_amt INT := 0;               -- Variable to store the calculated fine amount
+BEGIN
+    -- Get the date of issue for the specified roll number and book name
+    SELECT date_of_i INTO ndays FROM borrower_t21 WHERE roll_no = roll AND name_of_book = b_name;
+    
+    -- Calculate the number of days the book has been kept
+    mdays := SYSDATE - ndays;
+    
+    -- Fine calculation logic
+    IF mdays >= 15 AND mdays < 30 THEN
+        fine_amt := (mdays - 15) * 5; -- For days between 15 and 30, charge 5 per day
+    ELSIF mdays >= 30 THEN
+        fine_amt := 15 * 5 + (mdays - 30) * 50; -- For more than 30 days, charge 50 per day after the first 15 days
+    END IF;
+    
+    -- Update the status of the book to 'r' (returned)
+    UPDATE borrower_t21 SET status = 'r' WHERE roll_no = roll AND name_of_book = b_name;
+    
+    -- Insert a fine record if a fine is due
+    IF fine_amt > 0 THEN 
+        INSERT INTO fine_t21 VALUES (roll, SYSDATE, fine_amt);
+    END IF;
+    
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No data found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Exception occurred');
+END;
+/
+
+
+-- Query to display the updated records in borrower_t21
+SELECT * FROM borrower_t21;

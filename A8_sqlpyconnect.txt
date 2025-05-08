@@ -1,0 +1,123 @@
+do this in MySQL to create database
+CREATE DATABASE userdb;
+USE userdb;
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    age INT NOT NULL,
+    city VARCHAR(50) NOT NULL
+);
+ 
+do this python file code
+
+import mysql.connector
+
+# Establish the connection to MySQL
+con = mysql.connector.connect(
+    user='root',
+    password='sujit/0205',
+    host='localhost',
+    database='userdb'
+)
+
+# Function to insert a new record into the 'users' table
+def insert(name, age, city):
+    try:
+        cursor = con.cursor()
+        sql = "INSERT INTO users (name, age, city) VALUES (%s, %s, %s)"
+        user_data = (name, age, city)
+        cursor.execute(sql, user_data)
+        con.commit()
+        print("Data Insert Success")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+
+# Function to update an existing record in the 'users' table
+def update(id, name, age, city):
+    try:
+        cursor = con.cursor()
+        sql = "UPDATE users SET name=%s, age=%s, city=%s WHERE id=%s"
+        user_data = (name, age, city, id)
+        cursor.execute(sql, user_data)
+        con.commit()
+        print("Data Update Success")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+
+# Function to retrieve and display all records from the 'users' table
+def select():
+    try:
+        cursor = con.cursor()
+        sql = "SELECT id, name, age, city FROM users"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        print("ID | Name  | Age | City")
+        print("-----------------------")
+        for row in result:
+            print(f"{row[0]}  | {row[1]} | {row[2]}  | {row[3]}")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+
+# Function to delete a record from the 'users' table based on the ID
+def delete(id):
+    try:
+        cursor = con.cursor()
+        sql = "DELETE FROM users WHERE id=%s"
+        cursor.execute(sql, (id,))
+        con.commit()
+        print("Data Delete Success")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+
+# Main loop for the menu-driven program
+while True:
+    print("\nMenu:")
+    print("1. Insert Data")
+    print("2. Update Data")
+    print("3. Select Data")
+    print("4. Delete Data")
+    print("5. Exit")
+    
+    try:
+        choice = int(input("Enter Your Choice: "))
+        
+        if choice == 1:
+            name = input("Enter Name: ")
+            age = int(input("Enter Age: "))
+            city = input("Enter City: ")
+            insert(name, age, city)
+        
+        elif choice == 2:
+            id = int(input("Enter ID to Update: "))
+            name = input("Enter Name: ")
+            age = int(input("Enter Age: "))
+            city = input("Enter City: ")
+            update(id, name, age, city)
+        
+        elif choice == 3:
+            select()
+        
+        elif choice == 4:
+            id = int(input("Enter ID to Delete: "))
+            delete(id)
+        
+        elif choice == 5:
+            print("Exiting...")
+            con.close()  # Close the database connection
+            break
+        
+        else:
+            print("Invalid Selection. Please Try Again!")
+    
+    except ValueError:
+        print("Please enter a valid number for your choice or inputs.")
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")

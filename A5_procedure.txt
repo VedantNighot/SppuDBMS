@@ -1,0 +1,70 @@
+ create database student_marks;  
+
+ CREATE TABLE Stud_Marks (    Name VARCHAR(100),    Total_Marks INT);  
+
+CREATE TABLE Result (
+    Roll INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100),
+    Class VARCHAR(50)
+);
+
+---------------------------------------------------------------------------------------------------------
+1) Create the Stored Procedure
+
+DELIMITER $$
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    INSERT INTO Result (Name, Class)
+    SELECT 
+        Name,
+        CASE
+            WHEN Total_Marks >= 990 AND Total_Marks <= 1500 THEN 'Distinction'
+            WHEN Total_Marks >= 900 AND Total_Marks <= 989 THEN 'First Class'
+            WHEN Total_Marks >= 825 AND Total_Marks <= 899 THEN 'Higher Second Class'
+            ELSE 'No Classification'
+        END AS Class
+    FROM 
+        Stud_Marks;
+END$$
+
+DELIMITER ;
+----------------------------------------------------------------------------------------------------------
+2) Create the Stored Function
+
+DELIMITER $$
+
+CREATE FUNCTION countStudentsByClass(class_name VARCHAR(50)) 
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE student_count INT;
+    
+    SELECT COUNT(*) INTO student_count
+    FROM Result
+    WHERE Class = class_name;
+    
+    RETURN student_count;
+END$$
+
+DELIMITER ;
+------------------------------------------------------------------------------------------------------------
+
+
+INSERT INTO Stud_Marks (Name, Total_Marks) VALUES 
+('Sujit Avchar', 1200),
+('Mr robot', 950),
+('Elon Musk', 870),
+('Jeff Brzos', 50);
+
+
+-> Calling procedure
+
+ CALL proc_Grade();  
+
+mysql> SELECT * FROM Result;                                                                                                                                                                                       +------+--------------+---------------------+                                                                                                                                                                      | Roll | Name         | Class               |                                                                                                                                                                      +------+--------------+---------------------+                                                                                                                                                                      |    1 | Sujit Avchar | Distinction         |                                                                                                                                                                      |    2 | Mr robot     | First Class         |                                                                                                                                                                      |    3 | Elon Musk    | Higher Second Class |                                                                                                                                                                      |    4 | Jeff Brzos   | No Classification   |                                                                                                                                                                      +------+--------------+---------------------+
+
+--------------------------------------------------------------------------------------------------------
+-> Calling function  
+
+mysql> SELECT countStudentsByClass('Distinction') AS DistinctionCount;                                                                                                                                             +------------------+                                                                                                                                                                                               | DistinctionCount |                                                                                                                                                                                               +------------------+                                                                                                                                                                                               |                1 |                                                                                                                                                                                               +------------------+          

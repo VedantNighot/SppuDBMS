@@ -1,0 +1,148 @@
+Assignment B1
+
+test> use C35521;
+switched to db C35521
+
+I. Insert couple of Documents.
+
+C35529> db.articles.insertMany([
+  {
+    "Title": "Alchemist",
+    "Content": "Life lessons",
+    "Author": "shri",
+    "Author_age": 25,
+    "DOP": ISODate("2016-05-13T00:00:00Z"),
+    "Category": "novel",
+    "Comment": [
+      { "Name": "ramu", "Remarks": "Very Good" },
+      { "Name": "Ravee", "Remarks": "Nice" }
+    ]
+  },
+  {
+    "Title": "The Ghost Prison",
+    "Content": "Horror story",
+    "Author": "krishna",
+    "Author_age": 30,
+    "DOP": ISODate("2018-07-23T00:00:00Z"),
+    "Category": "Horror",
+    "Comment": [
+      { "Name": "aniket", "Remarks": "Mindblowing" },
+      { "Name": "Tanu", "Remarks": "wow" }
+    ]
+  }
+]);
+---------------
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6713f35fa0d7bf3965c73bf8'),
+    '1': ObjectId('6713f35fa0d7bf3965c73bf9')
+  }
+}
+
+II.Display the record
+C35521> db.articles.find().pretty();
+[
+  {
+    _id: ObjectId('6713f4a1128aca8d7dc73bf8'),
+    Title: 'Alchemist',
+    Content: 'Life lessons',
+    Author: 'shri',
+    Author_age: 25,
+    DOP: ISODate('2016-05-13T00:00:00.000Z'),
+    Category: 'novel',
+    Comment: [
+      { Name: 'ramu', Remarks: 'Very Good' },
+      { Name: 'Ravee', Remarks: 'Nice' }
+    ]
+  },
+  {
+    _id: ObjectId('6713f4a1128aca8d7dc73bf9'),
+    Title: 'The Ghost Prison',
+    Content: 'Horror story',
+    Author: 'krishna',
+    Author_age: 30,
+    DOP: ISODate('2018-07-23T00:00:00.000Z'),
+    Category: 'Horror',
+    Comment: [
+      { Name: 'aniket', Remarks: 'Mindblowing' },
+      { Name: 'Tanu', Remarks: 'wow' }
+    ]
+  }
+]
+
+III. Display first document belonging to a certain Author
+C35521> db.articles.findOne({ "Author": "krishna" });
+{
+  _id: ObjectId('6713f4a1128aca8d7dc73bf9'),
+  Title: 'The Ghost Prison',
+  Content: 'Horror story',
+  Author: 'krishna',
+  Author_age: 30,
+  DOP: ISODate('2018-07-23T00:00:00.000Z'),
+  Category: 'Horror',
+  Comment: [
+    { Name: 'aniket', Remarks: 'Mindblowing' },
+    { Name: 'Tanu', Remarks: 'wow' }
+  ]
+}
+
+IV.	Modify the comment made by certain person on a certain article.
+
+C35521> db.articles.update({ "Title": "Alchemist", "Comment.Name": "Ravee" },{ $set: { "Comment.$.Remarks": "Mindblowing" } });
+C35521> db.articles.updateOne({ "Title": "Alchemist", "Comment.Name": "Ravee" },{ $set: { "Comment.$.Remarks": "Mindblowing" } });
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 0,
+  upsertedCount: 0
+}
+
+
+V.	Insert record with save method with and without objectID 
+1.With ObjectID
+C35529> db.articles.insertOne({"_id": ObjectId("651ad76fa6d1b4c66fd829f1"),"Title": "Verity","Content": "Thriller story","Author": "Collen HOver","Author_age": 35,"DOP": ISODate("2019-09-15T00:00:00Z"),"Category": "THriller","Comment": []});
+{
+  acknowledged: true,
+  insertedId: ObjectId('651ad76fa6d1b4c66fd829f1')
+}
+2.Without ObjectId
+ db.articles.insertOne({"Title": "Verity","Content": "Thriller story","Author": "rajeshr","Author_age": 35,"DOP": ISODate("2019-09-15T00:00:00Z"),"Category": "THriller","Comment": []});
+{
+  acknowledged: true,
+  insertedId: ObjectId('6713ff34128aca8d7dc73bfa')
+}
+
+VI.	Update collection with save method.  
+}
+C35521> db.articles.save({"_id": ObjectId("651ad76fa6d1b4c66fd829f1"), "Title": "Silent Patient","Content": "Story of a murder mystery","Author": "Alex","Author_age": 45,"DOP": ISODate("2022-11-10T00:00:00Z"),"Category": "Murder Mystery","Comment": []});
+TypeError: db.articles.save is not a function
+C35521> db.articles.insertOne({ "_id": ObjectId("651ad76fa6d1b4c66fd829f2"), "Title": "Silent Patient", "Content": "Story of a murder mystery", "Author": "Alex", "Author_age": 45, "DOP": ISODate("2022-11-10T00:00:00Z"), "Category": "Murder Mystery", "Comment": [] });
+{
+  acknowledged: true,
+  insertedId: ObjectId('651ad76fa6d1b4c66fd829f2')
+}
+
+VII.	Add one more comment for particular title 
+C35521> db.articles.updateOne( { "Title": "Alchemist" }, { $push: { "Comment": { "Name": "Amit", "Remarks": "Good Lesson" } } } );
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+
+VIII.	Delete the documents whose author age is less than 18. 
+C35521> db.articles.deleteMany({ "Author_age": { $lt: 18 } });
+{ acknowledged: true, deletedCount: 0 }
+
+IX.	Remove All Documents from a Collection 
+C35521> db.articles.deleteMany({});
+{ acknowledged: true, deletedCount: 5 }
+
+X.	Delete the Article collection 
+
+C35521> db.articles.drop();
+true
